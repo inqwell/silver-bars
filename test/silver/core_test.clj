@@ -4,11 +4,15 @@
             [clojure.spec.test :as st])
   (:import (silver.core Order)))
 
+(st/instrument 'silver.core/make-order)
+(st/instrument 'silver.core/place-order!)
+(st/instrument 'silver.core/cancel-order!)
+(st/instrument 'silver.core/get-order-board)
+
 (deftest make-order-test
   (testing "Make an Order"
     ; Switch on instrumentation. This would be enabled only when running
     ; regression tests and disabled in production deployment
-    (st/instrument 'silver.core/make-order)
     (let [order (make-order {:user "1"
                              :quantity 2M
                              :price 3.236M
@@ -100,3 +104,12 @@
   (testing "Thrash the order manager for thread safety"
     (concurrency-test)
     (is (and (empty? @orders) (empty? @buys) (empty? @sells)))))
+
+(deftest get-order-board-test
+  (testing "Order boards"
+    (is (map? (get-order-board :buy)))
+    (is (map? (get-order-board :sell)))))
+
+(deftest make-order-spec-price
+  (testing "Violate spec"
+    (is (thrown? Throwable (get-order-board :foo)))))
