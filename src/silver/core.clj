@@ -128,13 +128,13 @@
   [order]
   (let [{:keys [id type]} order]
     (when (contains? @orders id)
-      (throw (Exception. (str "Duplicate order " id))))
+      (throw (ex-info (str "Duplicate order " id) {})))
     (swap! orders assoc id order)
     (post-to-board!
       (condp = type
       :buy buys
       :sell sells
-      (throw (Exception. (str "Illegal order type " type)))) ;belt+braces, since already spec'd
+      (throw (ex-info (str "Illegal order type " type) {}))) ;belt+braces, since already spec'd
       order)
     id))
 
@@ -163,7 +163,7 @@
           (condp = type
             :buy buys
             :sell sells
-            (throw (Exception. (str "Illegal order type " type)))) ;belt+braces, since already spec'd
+            (throw (ex-info (str "Illegal order type " type) {}))) ;belt+braces, since already spec'd
           @real-order)
         false))))
 
@@ -173,7 +173,7 @@
   (condp = type
     :buy @buys
     :sell @sells
-    (throw (Exception. (str "Illegal order type " type))))) ;belt+braces, since already spec'd
+    (throw (ex-info (str "Illegal order type " type) {})))) ;belt+braces, since already spec'd
 
 (defn lookup-order
   "Look up an order by its id"
